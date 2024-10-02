@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agritech Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        nav {
+            background-color: #343a40;
+            color: white;
+            padding: 15px;
+        }
+        nav a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            margin-right: 15px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: #495057;
+            border-radius: 5px;
+        }
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #343a40;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'farmer_signup' %}">Farmer Signup</a>
+        <a href="{% url 'customer_signup' %}">Customer Signup</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'product_list' %}">Products</a>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to Agritech</h1>
+        <p>Your virtual marketplace for farmers.</p>
+        <p>Explore our products, sign up as a farmer or customer, and manage your orders efficiently.</p>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Agritech. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

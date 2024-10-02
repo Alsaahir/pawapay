@@ -1,0 +1,59 @@
+<!-- marketplace/templates/marketplace/order_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        .btn-secondary {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Order Detail</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Product:</strong> {{ order.product.name }}</p>
+            <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+            <p><strong>Total Price:</strong> ZMW {{ order.total_price }}</p>
+            <p><strong>Status:</strong> {{ order.is_done|yesno:"Done,Pending" }}</p>
+
+            <form method="POST" action="{% url 'mark_order_done' order.id %}">
+                {% csrf_token %}
+                {% if not order.is_done %}
+                    <button type="submit" class="btn btn-success">Mark as Done</button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <a href="{% url 'order_list' %}" class="btn btn-secondary">Back to Orders</a>
+</div>
+
+</body>
+</html>
