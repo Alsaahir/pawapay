@@ -65,7 +65,7 @@ class CustomerSignupForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'price', 'description']  # Include the fields you want to capture
+        fields = ['name', 'price', 'description']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

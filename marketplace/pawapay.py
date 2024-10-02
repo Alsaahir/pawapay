@@ -12,25 +12,25 @@ def initiate_payout(amount, phone_number):
     }
     
     data = {
-        "payoutId": str(uuid.uuid4()),  # Generate a unique UUID for the payout
-        "amount": str(amount),  # Payout amount
-        "currency": "ZMW",  # Zambian Kwacha
-        "country": "ZMB",  # Zambia
-        "correspondent": "MTN_MOMO_ZMB",  # Correspondent provider
+        "payoutId": str(uuid.uuid4()),
+        "amount": str(amount),
+        "currency": "ZMW",
+        "country": "ZMB",
+        "correspondent": "MTN_MOMO_ZMB",
         "recipient": {
-            "type": "MSISDN",  # Mobile number type
+            "type": "MSISDN",
             "address": {
-                "value": phone_number  # Farmer's phone number
+                "value": phone_number
             }
         },
-        "customerTimestamp": timezone.now().isoformat() + "Z",  # Current timestamp in ISO format
-        "statementDescription": "Payment for agricultural goods"  # Description of the transaction
+        "customerTimestamp": timezone.now().isoformat() + "Z",
+        "statementDescription": "Payment for agricultural goods"
     }
 
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 200:
-        return response.json()  # Return JSON response if successful
+        return response.json()
     else:
         return {"error": response.status_code, "message": response.text}
 
@@ -43,33 +43,32 @@ def initiate_deposit(phone_number, total_price, order_id, customer_email):
         "Content-Type": "application/json"
     }
 
-    # Generate a unique UUID for the deposit transaction
     deposit_id = str(uuid.uuid4())
     
     data = {
-        "depositId": deposit_id,  # Insert generated UUID for deposit
-        "amount": str(total_price),  # Amount in ZMW (make sure it's a string)
-        "currency": "ZMW",  # Zambian Kwacha
-        "country": "ZMB",  # Zambia
-        "correspondent": "MTN_MOMO_ZMB",  # Correspondent provider
+        "depositId": deposit_id,
+        "amount": str(total_price),
+        "currency": "ZMW",
+        "country": "ZMB",
+        "correspondent": "MTN_MOMO_ZMB",
         "payer": {
-            "type": "MSISDN",  # Mobile subscriber number type
+            "type": "MSISDN",
             "address": {
-                "value": int(phone_number)  # Payer's phone number from the form
+                "value": int(phone_number)
             }
         },
-        "customerTimestamp": datetime.utcnow().isoformat() + "Z",  # Current timestamp
-        "statementDescription": "Payment for goods",  # Transaction statement description
-        "preAuthorisationCode": "string",  # Pre-authorization code, if available
+        "customerTimestamp": datetime.utcnow().isoformat() + "Z",
+        "statementDescription": "Payment for goods",
+        "preAuthorisationCode": "string",
         "metadata": [
             {
                 "fieldName": "orderId",
-                "fieldValue": str(order_id)  # Use the actual order ID
+                "fieldValue": str(order_id)
             },
             {
                 "fieldName": "customerId",
-                "fieldValue": customer_email,  # Use the customer's email from the user
-                "isPII": True  # Mark as Personally Identifiable Information (PII)
+                "fieldValue": customer_email,
+                "isPII": True
             }
         ]
     }
@@ -78,7 +77,7 @@ def initiate_deposit(phone_number, total_price, order_id, customer_email):
 
     if response.status_code == 200:
         print("Deposit successful:", response)
-        return response.json()  # Return JSON response if the request was successful
+        return response.json()
     else:
         print("Deposit failed:", response)
         return {"error": response.status_code, "message": response.text}

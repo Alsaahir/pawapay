@@ -30,7 +30,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, 'Logged in successfully!')
-                return redirect('home')  # Redirect to a home page or dashboard
+                return redirect('home')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
@@ -38,24 +38,22 @@ def login_view(request):
     return render(request, 'registration/login.html', {'form': form})
 
 
-@login_required  # Ensure the user is logged in before placing an order
+@login_required
 def purchase_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     
     if request.method == "POST":
         quantity = int(request.POST['quantity'])
-        phone_number = request.POST['phone_number']  # Get the phone number from the form
+        phone_number = request.POST['phone_number']
         total_price = product.price * quantity
         
-        # Retrieve the customer from the logged-in user
-        customer = request.user.customer  # Adjust this based on how you relate user and customer
+        customer = request.user.customer
 
-        # Create the order with the customer included
         order = Order.objects.create(
             product=product,
             quantity=quantity,
             total_price=total_price,
-            customer=customer  # Set the customer here
+            customer=customer
         )
 
         transaction = Transaction.objects.create(
@@ -65,12 +63,11 @@ def purchase_product(request, product_id):
             status="Pending"
         )
 
-        # Initiate mobile money payment using the new function
+ 
         response = initiate_deposit(phone_number, total_price, transaction.transaction_id, customer.email)
         logger.debug(f"Payment response: {response}")
 
         if response.get('error'):
-            # Handle error (you can render an error template or redirect accordingly)
             return render(request, 'error.html', {'error': response["message"]})
 
         if response.get('status') == 'ACCEPTED':
@@ -140,7 +137,6 @@ def process_payment(request):
             response = requests.post(url, json=payload, headers=headers)
             response_data = response.json()
 
-            # Check if the response was successful
             if response.get('status') == 'ACCEPTED':
                 print(response_data)
                 return JsonResponse({"message": "Payment successful", "data": response_data})
@@ -160,8 +156,8 @@ def farmer_signup(request):
         form = FarmerSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Log the user in after signup
-            return redirect('process_payment')  # Redirect to a farmer dashboard or homepage
+            login(request, user)
+            return redirect('process_payment')
     else:
         form = FarmerSignupForm()
         print("Unssuccessful!")
@@ -171,9 +167,9 @@ def customer_signup(request):
     if request.method == 'POST':
         form = CustomerSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()  # This creates the User and Customer
-            login(request, user)  # Log the user in after signup
-            return redirect('process_payment')  # Redirect to a customer dashboard or homepage
+            user = form.save()
+            login(request, user)
+            return redirect('process_payment')
     else:
         form = CustomerSignupForm()
     return render(request, 'registration/customer_signup.html', {'form': form})
@@ -183,10 +179,10 @@ def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
-            product = form.save(commit=False)  # Do not save yet
-            product.farmer = Farmer.objects.get(user=request.user)  # Associate with the logged-in farmer
-            product.save()  # Now save the product
-            return redirect('products')  # Redirect to a product list page or wherever appropriate
+            product = form.save(commit=False)
+            product.farmer = Farmer.objects.get(user=request.user)
+            product.save()
+            return redirect('products')
     else:
         form = ProductForm()
     
@@ -199,20 +195,19 @@ def product_list(request):
 
 
 def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)  # Get the product by UUID
+    product = get_object_or_404(Product, id=product_id)
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         if order_form.is_valid():
             quantity = order_form.cleaned_data['quantity']
             total_price = product.price * quantity
             
-            # Create or get the customer instance (assuming user is logged in)
             customer, created = Customer.objects.get_or_create(email=request.user.email, defaults={'name': request.user.username})
 
-            # Create a new order
+
             order = Order.objects.create(product=product, quantity=quantity, total_price=total_price, customer=customer)
             
-            return redirect('order_success')  # Redirect to an order success page
+            return redirect('order_success')
     else:
         order_form = OrderForm()
 
@@ -246,19 +241,15 @@ def mark_order_done(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=request.user.customer)
 
     if request.method == "POST" and not order.is_done:
-        # Mark the order as done
         order.is_done = True
         order.save()
 
-        # Calculate payout (5% deduction)
         total_price = float(order.total_price)
-        payout_amount = total_price * 0.95  # 95% of the total
+        payout_amount = total_price * 0.95
 
-        # Get farmer's details
-        farmer = order.product.farmer  # Assuming product has a relation to farmer
-        farmer_phone_number = farmer.contact  # Replace with actual field for farmer's phone
+        farmer = order.product.farmer
+        farmer_phone_number = farmer.contact
 
-        # Prepare data for the payout
         payout_response = initiate_payout(payout_amount, farmer_phone_number)
 
         if payout_response.get('status') == 'ACCEPTED':
@@ -268,7 +259,6 @@ def mark_order_done(request, order_id):
             logging.error(f"Payout failed: {payout_response['message']}")
             return JsonResponse({"error": "Payout failed. Please try again."})
 
-        # Payout was successful
         logging.info(f"Payout successful for Order {order_id}. Farmer received {payout_amount} ZMW")
         return JsonResponse({"message": "Order marked as done and payout successful."})
 
